@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "193238292025",
+    "project_id": "photoplan-test",
+    "storage_bucket": "photoplan-test.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:193238292025:android:13f593c360f9270a299fe8",
+        "android_client_info": {
+          "package_name": "com.coldfier.photoplan_test_01"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "193238292025-0cnjlaktu9snbemp8f6h9979i9mbmbur.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCevUELZ-7KBllm7M394PUfHF50ikdohrw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "193238292025-0cnjlaktu9snbemp8f6h9979i9mbmbur.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

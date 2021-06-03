@@ -1,0 +1,2 @@
+rootProject.name = "PhotoPlan-test-01"
+include ':app'
