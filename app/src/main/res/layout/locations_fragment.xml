@@ -62,7 +62,9 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/imageView">
 
-            <include layout="@layout/folder_content" />
+            <include
+                android:id="@+id/include"
+                layout="@layout/folder_content" />
         </FrameLayout>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
