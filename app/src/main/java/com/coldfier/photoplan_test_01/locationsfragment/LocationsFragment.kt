@@ -1,46 +1,45 @@
 package com.coldfier.photoplan_test_01.locationsfragment
 
-import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
-import android.provider.MediaStore
-import android.text.Editable
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.GridLayout
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.core.graphics.decodeBitmap
 import androidx.lifecycle.Observer
-import com.coldfier.photoplan_test_01.R
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.coldfier.photoplan_test_01.databinding.LocationsFragmentBinding
 
 class LocationsFragment : Fragment() {
 
-    private val IMAGE_RESPONSE = 1
-
-    companion object {
-        fun newInstance() = LocationsFragment()
-    }
-
     private lateinit var viewModel: LocationsViewModel
     private lateinit var binding: LocationsFragmentBinding
     private lateinit var getContent: ActivityResultLauncher<String>
-    private var bitmap: Bitmap? = null
+    private lateinit var bitmap: Bitmap
+    private lateinit var bitmapUri: Uri
+    private lateinit var rvAdapter: ContentRecyclerViewAdapter
 
+    @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         getContent = registerForActivityResult(ActivityResultContracts.GetContent()) {
-            val src = ImageDecoder.createSource(requireActivity().contentResolver, it)
-            bitmap = ImageDecoder.decodeBitmap(src)
+            it?.let {
+                bitmapUri = it
+
+                val src = ImageDecoder.createSource(requireContext().contentResolver, bitmapUri)
+                bitmap = ImageDecoder.decodeBitmap(src)
+            }
         }
     }
 
@@ -50,26 +49,42 @@ class LocationsFragment : Fragment() {
     ): View? {
 
         binding = LocationsFragmentBinding.inflate(inflater, container, false)
+        viewModel = ViewModelProvider(this).get(LocationsViewModel::class.java)
+
 
         return binding.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProvider(this).get(LocationsViewModel::class.java)
+
         binding.addNewFolderFAB.setOnClickListener {
-            viewModel.testClick()
-            Toast.makeText(context, "Go to firebase!", Toast.LENGTH_SHORT).show()
+            viewModel.getImageFromFirebase(binding.include.contentNameEditText.text.toString())
         }
         binding.include.floatingActionButton.setOnClickListener {
-            //viewModel.getClick()
             getContent.launch("image/*")
         }
 
-        viewModel.data.observe(viewLifecycleOwner, Observer {
-            binding.include.contentNameEditText.setText(it.toString())
+        rvAdapter = ContentRecyclerViewAdapter()
+        binding.include.imagesRecyclerView.adapter = ContentRecyclerViewAdapter()
+        binding.include.imagesRecyclerView.layoutManager = GridLayoutManager(requireContext().applicationContext, 3, RecyclerView.VERTICAL, false)
+
+        viewModel.imageList.observe(viewLifecycleOwner, {
+            rvAdapter.imagesList = it
+            binding.imageView2.setImageBitmap(it[0])
         })
-        if (bitmap != null) binding.imageView2.setImageBitmap(bitmap)
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if (::bitmap.isInitialized) {
+            viewModel.addBitmap(bitmap)
+        }
+
+        if (::bitmap.isInitialized && ::bitmapUri.isInitialized) {
+            viewModel.addImageToFirebase(bitmap, bitmapUri, binding.include.contentNameEditText.text.toString())
+        }
     }
 
 }

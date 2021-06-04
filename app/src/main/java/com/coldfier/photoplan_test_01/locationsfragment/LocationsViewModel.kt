@@ -1,57 +1,60 @@
 package com.coldfier.photoplan_test_01.locationsfragment
 
-import android.content.Intent
+import android.app.Application
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.net.Uri
 import android.util.Log
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.google.android.gms.tasks.Task
-import com.google.firebase.firestore.QuerySnapshot
+import androidx.lifecycle.*
 import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.firestore.ktx.toObjects
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.StorageReference
+import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
 
 class LocationsViewModel : ViewModel() {
 
-    val data = MutableLiveData<MutableMap<String, Int>>()
+    private val _imageList = MutableLiveData<MutableList<Bitmap>>()
+    val imageList: LiveData<MutableList<Bitmap>>
+        get() = _imageList
 
-    fun testClick() {
-        val db = Firebase.firestore
+    var listRefs = mutableListOf<StorageReference>()
 
-        val userMap = hashMapOf("one" to 1, "two" to 2, "three" to 3)
 
-        db.collection("users").add(userMap)
-            .addOnSuccessListener {
-                Log.d("fire", "success")
-            }.addOnFailureListener{
-                Log.d("fire", "fail")
-            }
+    fun addBitmap(bitmap: Bitmap) {
+        _imageList.value?.add(bitmap)
     }
 
-    fun getClick() {
+    fun addImageToFirebase(bitmap: Bitmap, uri: Uri, folderContentName: String) {
         viewModelScope.launch {
-            val db = Firebase.firestore
+            val baos = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+            val data = baos.toByteArray()
 
-            val map = db.collection("users")
-                .get()
-                .addOnSuccessListener { snapshot ->
-                    run {
-                        Log.d("fire", "success")
-                        val mappp = mutableMapOf<String, Int>()
-                        snapshot.documents[0]
-                            .data?.forEach {
-                                    (key, value) ->
-                                mappp[key] = value.toString().toInt()
-                            }
-                        data.value = mappp
-                    }
+            val path = Firebase.storage.reference.child(folderContentName + "/${uri.lastPathSegment}")
+            path.putBytes(data)
 
-                }.addOnFailureListener{
-                    Log.d("fire", "fail")
-                }
         }
+    }
 
+    fun getImageFromFirebase(folderContentName: String) {
+        viewModelScope.launch {
 
+            val storageRef = Firebase.storage("gs://photoplan-test.appspot.com").reference.child("/$folderContentName")
+            storageRef.listAll().addOnSuccessListener {
+               it.let { it ->
+                   listRefs = mutableListOf()
+                   //сюда летят ссылки на фото, здесь надо формировать лист с Bitmap или лист со ссылками
+                   it.items.forEach{
+                           listRefs.add(it)
+                   }
+                   //не прилетают - никак не обрабатывать
+                   it.prefixes.forEach {
+                       prefix -> val pref = prefix
+                   }
+               }
+            }
+        }
     }
 }
