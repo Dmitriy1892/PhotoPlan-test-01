@@ -7,6 +7,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.util.Log
 import androidx.core.graphics.drawable.toBitmap
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -24,15 +25,21 @@ class LocationsViewModel : ViewModel() {
 
     val data = MutableLiveData<MutableMap<String, Int>>()
 
-    var imagesList = MutableLiveData<MutableList<Bitmap>>()
+    private val _imagesList = MutableLiveData<List<Bitmap>>()
+
+    val imagesList : LiveData<List<Bitmap>>
+        get() = _imagesList
 
     var listRefs = mutableListOf<StorageReference>()
 
     init {
-        val img = Picture()
-        img.beginRecording(5,5)
-        imagesList.value = mutableListOf(Bitmap.createBitmap(img))
+        _imagesList.value = mutableListOf()
+    }
 
+    fun addImage(bitmap: Bitmap) {
+        val buff = _imagesList.value?.toMutableList()
+        buff?.add(bitmap)
+        _imagesList.value = buff!!
     }
 
     fun testClick() {
