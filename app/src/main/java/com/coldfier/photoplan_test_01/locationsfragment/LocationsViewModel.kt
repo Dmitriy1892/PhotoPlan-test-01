@@ -15,6 +15,7 @@ import com.bumptech.glide.request.target.BitmapImageViewTarget
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.coldfier.photoplan_test_01.R
+import com.coldfier.photoplan_test_01.addItem
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageReference
@@ -34,14 +35,20 @@ class LocationsViewModel(application: Application) : AndroidViewModel(applicatio
     val imagesList : LiveData<List<Bitmap>>
         get() = _imagesList
 
+    /*@Volatile
+    var listRefs = mutableListOf<Uri>() */
+
     @Volatile
-    var listRefs = mutableListOf<Uri>()
+    private var _listRefs = MutableLiveData<List<Uri>>()
+    val listRefs: LiveData<List<Uri>>
+        get() = _listRefs
 
     @Volatile
     var bufferImagesList = mutableListOf<Bitmap>()
 
     init {
         _imagesList.value = mutableListOf()
+        _listRefs.value = listOf()
     }
 
     fun addImage(bitmap: Bitmap) {
@@ -49,6 +56,15 @@ class LocationsViewModel(application: Application) : AndroidViewModel(applicatio
             val buff = _imagesList.value?.toMutableList()
             buff?.add(bitmap)
             _imagesList.value = buff!!
+        }
+    }
+
+    fun addUri(uri: Uri) {
+        viewModelScope.launch {
+
+            //защита от добавления повторных изображений - сравнение Uri
+            listRefs.value?.forEach { if (it == uri) return@launch }
+            _listRefs.addItem(uri)
         }
     }
 
@@ -89,28 +105,36 @@ class LocationsViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    fun addImageToFirebase(bitmap: Bitmap, uri: Uri, folderContentName: String) {
+    fun addImageToFirebase(uri: Uri, folderContentName: String) {
+        viewModelScope.launch {
+            var uploadTask = Firebase.storage.reference.child(folderContentName + "/${uri.lastPathSegment}")
+            uploadTask.putFile(uri)
+        }
+    }
+
+    /*fun addImageToFirebase(bitmap: Bitmap, uri: Uri, folderContentName: String) {
         viewModelScope.launch {
             val baos = ByteArrayOutputStream()
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
             val data = baos.toByteArray()
-
             val path = Firebase.storage.reference.child(folderContentName + "/${uri.lastPathSegment}")
             path.putBytes(data)
 
         }
-    }
+    } */
 
     fun getImageFromFirebase(folderContentName: String) {
         viewModelScope.launch {
             val storageRef = Firebase.storage("gs://photoplan-test.appspot.com").reference.child("/$folderContentName")
             storageRef.listAll().addOnSuccessListener {
                 it.let { it ->
-                    listRefs = mutableListOf()
+                    _listRefs.value = listOf()
+                    //listRefs = mutableListOf()
                     //сюда летят ссылки на фото и формируется список со ссылками
-                    it.items.forEach{
-                        it.downloadUrl.addOnSuccessListener {
-                            listRefs.add(it)
+                    it.items.forEach{ storageReference ->
+                        storageReference.downloadUrl.addOnSuccessListener {
+                            _listRefs.addItem(it)
+                            //listRefs.add(it)
                         }
                     }
                 }
