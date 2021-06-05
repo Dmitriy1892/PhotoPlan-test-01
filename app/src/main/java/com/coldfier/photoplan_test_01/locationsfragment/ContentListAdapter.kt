@@ -3,16 +3,12 @@ package com.coldfier.photoplan_test_01.locationsfragment
 import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.coldfier.photoplan_test_01.databinding.ItemImageBinding
 
-class ContentRVAdapter: RecyclerView.Adapter<ContentRVAdapter.ContentViewHolder>(){
-
-    var adapterImagesList = mutableListOf<Bitmap>()
-        set(value) {
-            field = value
-            notifyDataSetChanged()
-        }
+class ContentListAdapter: ListAdapter<Bitmap, ContentListAdapter.ContentViewHolder>(DIFF_CALLBACK) {
 
     class ContentViewHolder(private val binding: ItemImageBinding): RecyclerView.ViewHolder(binding.root) {
         fun bind(image: Bitmap) {
@@ -21,16 +17,24 @@ class ContentRVAdapter: RecyclerView.Adapter<ContentRVAdapter.ContentViewHolder>
         }
     }
 
+    companion object {
+        val DIFF_CALLBACK = object : DiffUtil.ItemCallback<Bitmap>() {
+            override fun areItemsTheSame(oldItem: Bitmap, newItem: Bitmap): Boolean {
+                return oldItem.sameAs(newItem)
+            }
+
+            override fun areContentsTheSame(oldItem: Bitmap, newItem: Bitmap): Boolean {
+                return oldItem.sameAs(newItem)
+            }
+
+        }
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContentViewHolder {
         return ContentViewHolder(ItemImageBinding.inflate(LayoutInflater.from(parent.context)))
     }
 
     override fun onBindViewHolder(holder: ContentViewHolder, position: Int) {
-        holder.bind(adapterImagesList[position])
+        holder.bind(getItem(position))
     }
-
-    override fun getItemCount(): Int {
-        return adapterImagesList.size
-    }
-
 }
