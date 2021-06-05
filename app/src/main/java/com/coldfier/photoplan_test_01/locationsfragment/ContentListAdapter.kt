@@ -1,6 +1,5 @@
 package com.coldfier.photoplan_test_01.locationsfragment
 
-import android.graphics.Bitmap
 import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -12,9 +11,8 @@ import com.coldfier.photoplan_test_01.databinding.ItemImageBinding
 class ContentListAdapter: ListAdapter<Uri, ContentListAdapter.ContentViewHolder>(DIFF_CALLBACK) {
 
     class ContentViewHolder(private val binding: ItemImageBinding): RecyclerView.ViewHolder(binding.root) {
-        fun bind(image: Uri) {
-            //binding.holderImageView.setImageBitmap(image)
-            binding.uri = image
+        fun bind(uri: Uri) {
+            binding.uri = uri
             binding.executePendingBindings()
         }
     }
