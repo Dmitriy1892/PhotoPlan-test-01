@@ -7,3 +7,9 @@ fun <T> MutableLiveData<List<T>>.addItem(item: T) {
     oldList.add(item)
     this.value = oldList
 }
+
+fun <T> MutableLiveData<List<T>>.deleteItem(item: T) {
+    val oldList = this.value?.toMutableList() ?: mutableListOf()
+    oldList.remove(item)
+    this.value = oldList
+}
