@@ -1,17 +1,19 @@
 package com.coldfier.photoplan_test_01.locationsfragment
 
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Picture
+import android.app.Application
+import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.provider.MediaStore
 import android.util.Log
 import androidx.core.graphics.drawable.toBitmap
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
+import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.BitmapDrawableResource
+import com.bumptech.glide.request.target.BitmapImageViewTarget
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.coldfier.photoplan_test_01.R
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -20,26 +22,34 @@ import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.launch
 import org.xmlpull.v1.XmlPullParser
 import java.io.ByteArrayOutputStream
+import java.net.URL
 
-class LocationsViewModel : ViewModel() {
+class LocationsViewModel(application: Application) : AndroidViewModel(application) {
 
     val data = MutableLiveData<MutableMap<String, Int>>()
 
-    private val _imagesList = MutableLiveData<List<Bitmap>>()
+    val appCtx = application
 
+    private val _imagesList = MutableLiveData<List<Bitmap>>()
     val imagesList : LiveData<List<Bitmap>>
         get() = _imagesList
 
-    var listRefs = mutableListOf<StorageReference>()
+    @Volatile
+    var listRefs = mutableListOf<Uri>()
+
+    @Volatile
+    var bufferImagesList = mutableListOf<Bitmap>()
 
     init {
         _imagesList.value = mutableListOf()
     }
 
     fun addImage(bitmap: Bitmap) {
-        val buff = _imagesList.value?.toMutableList()
-        buff?.add(bitmap)
-        _imagesList.value = buff!!
+        viewModelScope.launch {
+            val buff = _imagesList.value?.toMutableList()
+            buff?.add(bitmap)
+            _imagesList.value = buff!!
+        }
     }
 
     fun testClick() {
@@ -97,13 +107,11 @@ class LocationsViewModel : ViewModel() {
             storageRef.listAll().addOnSuccessListener {
                 it.let { it ->
                     listRefs = mutableListOf()
-                    //сюда летят ссылки на фото, здесь надо формировать лист с Bitmap или лист со ссылками
+                    //сюда летят ссылки на фото и формируется список со ссылками
                     it.items.forEach{
-                        listRefs.add(it)
-                    }
-                    //не прилетают - никак не обрабатывать
-                    it.prefixes.forEach {
-                            prefix -> val pref = prefix
+                        it.downloadUrl.addOnSuccessListener {
+                            listRefs.add(it)
+                        }
                     }
                 }
             }

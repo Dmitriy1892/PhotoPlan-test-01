@@ -40,14 +40,17 @@ class LocationsFragment : Fragment() {
     ): View? {
 
         binding = LocationsFragmentBinding.inflate(inflater, container, false)
-        viewModel = ViewModelProvider(this).get(LocationsViewModel::class.java)
+        val viewModelFactory: ViewModelProvider.Factory = LocationsViewModelFactory(requireActivity().application)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(LocationsViewModel::class.java)
 
         binding.addNewFolderFAB.setOnClickListener {
-            viewModel.testClick()
-            Toast.makeText(context, "Go to firebase!", Toast.LENGTH_SHORT).show()
+            /*viewModel.testClick()
+            Toast.makeText(context, "Go to firebase!", Toast.LENGTH_SHORT).show()*/
+            viewModel.getImageFromFirebase(binding.include.contentNameEditText.text.toString())
         }
         binding.include.floatingActionButton.setOnClickListener {
-            getContent.launch("image/*")
+            //getContent.launch("image/*")
+            rvAdapter.submitList(viewModel.listRefs)
         }
 
         rvAdapter = ContentListAdapter()
@@ -60,7 +63,7 @@ class LocationsFragment : Fragment() {
         })
 
         viewModel.imagesList.observe(viewLifecycleOwner, Observer{
-            rvAdapter.submitList(it)
+            //rvAdapter.submitList(it)
         })
 
         return binding.root
