@@ -1,6 +1,8 @@
 package com.coldfier.photoplan_test_01.locationsfragment
 
-import android.net.Uri
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -8,26 +10,47 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.lifecycle.Observer
-import androidx.recyclerview.widget.GridLayoutManager
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.coldfier.photoplan_test_01.databinding.LocationsFragmentBinding
+import com.coldfier.photoplan_test_01.model.Folder
+import com.coldfier.photoplan_test_01.model.ImageAddContract
 
-class LocationsFragment : Fragment() {
+class LocationsFragment : Fragment(), FolderClickListener {
 
     private lateinit var viewModel: LocationsViewModel
     private lateinit var binding: LocationsFragmentBinding
-    private lateinit var getContent: ActivityResultLauncher<String>
-    private var bitmapUri: Uri? = null
-    private lateinit var rvAdapter: ContentListAdapter
+    private lateinit var getContent: ActivityResultLauncher<ImageAddContract>
+    private var imageAddContract: ImageAddContract? = null
+    private lateinit var foldersRVAdapter: FolderListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        getContent = registerForActivityResult(ActivityResultContracts.GetContent()) {
-            it?.let {
-                bitmapUri = it
+
+        val contract = object :ActivityResultContract<ImageAddContract, ImageAddContract>() {
+            override fun createIntent(context: Context, input: ImageAddContract?): Intent {
+                val intent = Intent(Intent.ACTION_GET_CONTENT)
+                intent.addCategory(Intent.CATEGORY_OPENABLE)
+                intent.type = input?.requestOrUri
+                intent.putExtra("FOLDER_NAME", input?.folderId)
+                return intent
             }
+
+            override fun parseResult(resultCode: Int, intent: Intent?): ImageAddContract? {
+                if (resultCode == Activity.RESULT_OK || intent != null) {
+                    return ImageAddContract(
+                        folderId = "",
+                        folderName = "",
+                        requestOrUri = intent?.data.toString()
+                    )
+                }
+                return null
+            }
+
+        }
+        getContent = registerForActivityResult(contract) {
+            imageAddContract = it
         }
     }
 
@@ -44,28 +67,19 @@ class LocationsFragment : Fragment() {
         binding.addNewFolderFAB.setOnClickListener {
         }
 
-        binding.include.deleteButton.setOnClickListener {
+        //viewModel.getFoldersList()
 
-        }
-
-        binding.include.floatingActionButton.setOnClickListener {
-            getContent.launch("image/*")
-        }
-
-        rvAdapter = ContentListAdapter()
-        binding.include.imagesRecyclerView.adapter = rvAdapter
-        binding.include.imagesRecyclerView.layoutManager = GridLayoutManager(requireContext(), 3, RecyclerView.VERTICAL, false)
-
-
-        viewModel.listRefs.observe(viewLifecycleOwner, {
-            rvAdapter.submitList(it)
+        foldersRVAdapter = FolderListAdapter(getContent, this)
+        binding.foldersRecyclerView.adapter = foldersRVAdapter
+        binding.foldersRecyclerView.layoutManager = LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
+        viewModel.foldersList.observe(viewLifecycleOwner, {
+            foldersRVAdapter.foldersList = it
         })
 
-        viewModel.getImageFromFirebase(binding.include.contentNameEditText.text.toString())
+        binding.addNewFolderFAB.setOnClickListener {
+            viewModel.addNewFolder(folder = Folder("${Math.random()*253}", "Гора Джомолунгма", mutableListOf()))
+        }
 
-        viewModel.data.observe(viewLifecycleOwner, {
-            binding.include.contentNameEditText.setText(it.toString())
-        })
 
         return binding.root
     }
@@ -73,11 +87,19 @@ class LocationsFragment : Fragment() {
     override fun onResume() {
         super.onResume()
 
-        if (bitmapUri != null) {
-            viewModel.addUri(bitmapUri!!)
-            viewModel.addImageToFirebase(bitmapUri!!, binding.include.contentNameEditText.text.toString())
-            bitmapUri = null
+        if (imageAddContract != null) {
+            imageAddContract?.folderId = viewModel.folderId!!
+            imageAddContract?.folderName = viewModel.folderName!!
+            viewModel.addImage(imageAddContract!!)
+            imageAddContract = null
+            viewModel.folderId = null
+            viewModel.folderName = null
         }
+    }
+
+    override fun onClickListener(folderId: String, folderName: String) {
+        viewModel.folderId = folderId
+        viewModel.folderName = folderName
     }
 
 }

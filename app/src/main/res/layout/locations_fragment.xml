@@ -27,45 +27,53 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="0dp"
-            android:layout_height="98dp"
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:src="@drawable/ic_rectangle_folder"
+            android:padding="18dp"
+            app:cardCornerRadius="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/headerTextView" />
+            app:layout_constraintTop_toBottomOf="@+id/headerTextView">
 
-        <EditText
-            android:id="@+id/folderNameEditText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:fontFamily="@font/ubuntu"
-            android:inputType="textPersonName"
-            android:text="Улицы"
-            android:textAlignment="center"
-            android:textColor="#000000"
-            android:textSize="24sp"
-            app:layout_constraintEnd_toEndOf="@+id/imageView"
-            app:layout_constraintHorizontal_bias="0.498"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/imageView" />
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardView22"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="16dp"
+                android:backgroundTint="#EDF3F4"
+                android:focusable="true"
+                android:visibility="visible"
+                app:cardCornerRadius="16dp"
+                tools:visibility="visible">
 
-        <FrameLayout
-            android:id="@+id/frameLayout"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+                <EditText
+                    android:id="@+id/folderNameEditText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:fontFamily="@font/ubuntu"
+                    android:inputType="textPersonName"
+                    android:text="Улицы"
+                    android:textAlignment="center"
+                    android:textColor="#000000"
+                    android:textSize="24sp" />
+            </androidx.cardview.widget.CardView>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/foldersRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@+id/imageView2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageView">
-
-            <include
-                android:id="@+id/include"
-                layout="@layout/folder_content" />
-        </FrameLayout>
+            app:layout_constraintTop_toBottomOf="@+id/cardView"
+            app:layout_constraintVertical_bias="0.0" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/addNewFolderFAB"

@@ -2,68 +2,72 @@ package com.coldfier.photoplan_test_01.locationsfragment
 
 import android.app.Application
 import android.graphics.*
-import android.net.Uri
+import androidx.core.net.toUri
 import androidx.lifecycle.*
 import com.coldfier.photoplan_test_01.addItem
-import com.coldfier.photoplan_test_01.deleteItem
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.ktx.storage
+import com.coldfier.photoplan_test_01.firebase.FirebaseApi
+import com.coldfier.photoplan_test_01.model.Folder
+import com.coldfier.photoplan_test_01.model.ImageAddContract
+import com.coldfier.photoplan_test_01.model.ImageItem
+import com.coldfier.photoplan_test_01.updateList
 import kotlinx.coroutines.launch
 
 class LocationsViewModel(application: Application) : AndroidViewModel(application) {
 
-    val data = MutableLiveData<MutableMap<String, Int>>()
-
     val appCtx = application
 
-    @Volatile
-    private var _listRefs = MutableLiveData<List<Uri>>()
-    val listRefs: LiveData<List<Uri>>
-        get() = _listRefs
+    private var _foldersList = MutableLiveData<List<Folder>>()
+    val foldersList: LiveData<List<Folder>>
+        get() = _foldersList
+
+    var folderId: String? = null
+    var folderName: String? = null
+
+
+    private val firebaseApi = FirebaseApi()
 
     init {
-        _listRefs.value = listOf()
+        _foldersList.value = listOf()
+        _foldersList.addItem(Folder("null", "null", mutableListOf()))
     }
 
-    fun addUri(uri: Uri) {
+    fun addImage(imageAddContract: ImageAddContract) {
         viewModelScope.launch {
+            _foldersList.value?.forEach{ folder ->
+                if (folder.folderId == imageAddContract.folderId) {
 
-            //защита от добавления повторных изображений - сравнение локальных Uri
-            listRefs.value?.forEach { if (it == uri) return@launch }
-            _listRefs.addItem(uri)
-        }
-    }
-
-    fun addImageToFirebase(uri: Uri, folderContentName: String) {
-        viewModelScope.launch {
-            val uploadTask = Firebase.storage.reference.child("$folderContentName/${uri.lastPathSegment}")
-            uploadTask.putFile(uri)
-        }
-    }
-
-    fun getImageFromFirebase(folderContentName: String) {
-        viewModelScope.launch {
-            val storageRef = Firebase.storage("gs://photoplan-test.appspot.com/").reference.child(folderContentName)
-            storageRef.listAll().addOnSuccessListener {
-                it.let { it ->
-                    _listRefs.value = listOf()
-                    //сюда летят ссылки на фото и формируется список со ссылками
-                    it.items.forEach{ storageReference ->
-                        storageReference.downloadUrl.addOnSuccessListener {
-                            _listRefs.addItem(it)
-                        }
+                    //если изображение есть в папке, то return
+                    folder.imageList.forEach { imageItem ->
+                        if (imageItem.imageId == imageAddContract.requestOrUri.toUri().lastPathSegment.toString()) return@launch
                     }
+
+                    val imageItem = ImageItem(
+                        imageAddContract.requestOrUri.toUri().lastPathSegment.toString(),
+                        imageAddContract.requestOrUri.toUri()
+                    )
+                    folder.imageList.add(imageItem)
+                    firebaseApi.addFolderToCloudFirestore(folder)
+                    firebaseApi.addImageToFirebaseStorage(imageItem, folder.folderId)
+                    _foldersList.updateList()
+                    return@launch
                 }
             }
+            val list = mutableListOf<ImageItem>()
+            list.add(ImageItem(imageAddContract.requestOrUri.toUri().lastPathSegment.toString(), imageAddContract.requestOrUri.toUri()))
+            _foldersList.addItem(Folder(imageAddContract.folderId, imageAddContract.folderName, list))
         }
     }
 
-    fun deleteImageFromFirebase(uri: Uri, folderContentName: String) {
+    fun addNewFolder(folder: Folder) {
         viewModelScope.launch {
-            val storageRef = Firebase.storage("gs://photoplan-test.appspot.com/").reference.child("$folderContentName/${uri.lastPathSegment}")
-            storageRef.delete().addOnSuccessListener {
-                _listRefs.deleteItem(uri)
-            }
+            _foldersList.addItem(folder)
+            firebaseApi.addFolderToCloudFirestore(folder)
+        }
+    }
+
+    fun getFoldersList() {
+        viewModelScope.launch {
+            _foldersList.value = firebaseApi.getFolderListFromCloudFirestore()
         }
     }
 }
