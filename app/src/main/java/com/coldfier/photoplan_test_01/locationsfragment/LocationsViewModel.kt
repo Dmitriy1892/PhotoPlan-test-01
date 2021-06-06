@@ -23,13 +23,11 @@ class LocationsViewModel(application: Application) : AndroidViewModel(applicatio
     var folderId: String? = null
     var folderName: String? = null
 
-
-    private val firebaseApi = FirebaseApi()
-
     init {
         _foldersList.value = listOf()
-        _foldersList.addItem(Folder("null", "null", mutableListOf()))
     }
+
+    private val firebaseApi = FirebaseApi()
 
     fun addImage(imageAddContract: ImageAddContract) {
         viewModelScope.launch {
@@ -65,9 +63,43 @@ class LocationsViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    fun getFoldersList() {
+    //not the best case, need to review
+    fun getFolderList() {
+        val folderList = mutableListOf<Folder>()
+        FirebaseApi.getFirestore().collection("locations").document("streets").get().addOnSuccessListener {
+            it.data?.forEach { (key, value) ->
+                apply {
+
+                    //start
+                    val listImageItem = mutableListOf<ImageItem>()
+                    val storageRef = FirebaseApi.getFirebaseStorage().reference.child(key)
+                    storageRef.listAll().addOnSuccessListener { listResult ->
+                        //сюда летят ссылки на фото и формируется список со ссылками
+                        listResult.items.forEach { storageReference ->
+                            storageReference.downloadUrl.addOnSuccessListener { uri ->
+                                val imageItem = ImageItem(uri.lastPathSegment.toString(), uri)
+                                listImageItem.add(imageItem)
+                                _foldersList.updateList()
+                            }
+                        }
+                    }
+                    //end
+                    folderList.add(Folder(key, value.toString(), listImageItem))
+
+                } }
+            _foldersList.value = folderList
+        }
+    }
+
+    fun updateFolderName(folderId: String, folderName: String) {
         viewModelScope.launch {
-            _foldersList.value = firebaseApi.getFolderListFromCloudFirestore()
+            _foldersList.value?.forEach {
+                if (it.folderId == folderId) {
+                    it.folderName = folderName
+                    return@forEach
+                }
+            }
+            firebaseApi.updateFolderCloudFirestoreName(folderId, folderName)
         }
     }
 }

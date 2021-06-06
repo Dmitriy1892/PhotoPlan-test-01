@@ -1,5 +1,6 @@
 package com.coldfier.photoplan_test_01.firebase
 
+import android.annotation.SuppressLint
 import android.util.Log
 import com.coldfier.photoplan_test_01.model.Folder
 import com.coldfier.photoplan_test_01.model.ImageItem
@@ -12,12 +13,12 @@ import com.google.firebase.storage.ktx.storage
 
 class FirebaseApi {
 
-    suspend fun addImageToFirebaseStorage(imageItem: ImageItem, folderId: String) {
+    fun addImageToFirebaseStorage(imageItem: ImageItem, folderId: String) {
         val uploadTask = getFirebaseStorage().reference.child("$folderId/${imageItem.imageId}")
         uploadTask.putFile(imageItem.imageUri)
     }
 
-    suspend fun addFolderToCloudFirestore(folder: Folder) {
+    fun addFolderToCloudFirestore(folder: Folder) {
         val data = mapOf(folder.folderId to folder.folderName)
         getFirestore().collection("locations")
             .document("streets")
@@ -28,7 +29,7 @@ class FirebaseApi {
             }
     }
 
-    suspend fun updateFolderCloudFirestoreName(folderId: String, newFolderName: String) {
+    fun updateFolderCloudFirestoreName(folderId: String, newFolderName: String) {
         getFirestore().collection("locations")
             .document("streets")
             .update(folderId, newFolderName)
@@ -37,18 +38,20 @@ class FirebaseApi {
             }
     }
 
-    suspend fun getFolderListFromCloudFirestore() : List<Folder> {
+    fun getFolderListFromCloudFirestore() : List<Folder> {
         val folderList = mutableListOf<Folder>()
         getFirestore().collection("locations").document("streets").get().addOnSuccessListener {
             it.data?.forEach { (key, value) ->
                 apply {
-                    folderList.add(Folder(key, value.toString(), mutableListOf()))
+
+                    val imageItemList = getImagesFromFirebaseStorage(key)
+                    folderList.add(Folder(key, value.toString(), imageItemList))
                 } }
         }
         return folderList
     }
 
-    suspend fun getImagesFromFirebaseStorage(folderName: String): List<ImageItem> {
+    fun getImagesFromFirebaseStorage(folderName: String): MutableList<ImageItem> {
         val listImageItem = mutableListOf<ImageItem>()
         val storageRef = getFirebaseStorage().reference.child(folderName)
         storageRef.listAll().addOnSuccessListener { listResult ->
@@ -63,7 +66,7 @@ class FirebaseApi {
         return listImageItem
     }
 
-    suspend fun deleteImageFromFirebaseStorage(imageItem: ImageItem, folderName: String) {
+    fun deleteImageFromFirebaseStorage(imageItem: ImageItem, folderName: String) {
         val storageRef = getFirebaseStorage().reference.child("$folderName/${imageItem.imageUri.lastPathSegment}")
         storageRef.delete().addOnSuccessListener {
             Log.d("fire", "success with firebase storage deleting")

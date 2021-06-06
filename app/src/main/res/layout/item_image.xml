@@ -15,6 +15,8 @@
         android:layout_marginRight="8dp"
         app:cardUseCompatPadding="true"
         app:contentPaddingRight="8dp"
+        android:clickable="true"
+        android:focusableInTouchMode="true"
         app:cardCornerRadius="15dp">
 
         <ImageView
@@ -28,6 +30,8 @@
             android:id="@+id/deleteCheckBox"
             android:layout_width="22dp"
             android:layout_height="25dp"
+            android:visibility="gone"
+            android:focusable="true"
             android:layout_gravity="right|top"
             android:button="@drawable/checkbox_selector" />
 

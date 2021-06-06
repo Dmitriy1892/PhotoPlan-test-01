@@ -8,6 +8,8 @@
 
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusableInTouchMode="true"
         android:layout_marginTop="16dp">
 
         <androidx.cardview.widget.CardView
@@ -41,7 +43,7 @@
                         android:layout_marginTop="16dp"
                         android:fontFamily="@font/ubuntu"
                         android:inputType="textPersonName"
-                        android:text="Гора Джомолунгма"
+                        android:imeOptions="actionDone"
                         android:textColor="#869495"
                         android:textSize="24sp"
                         app:layout_constraintStart_toStartOf="parent"

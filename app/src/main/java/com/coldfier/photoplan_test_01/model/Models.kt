@@ -4,8 +4,8 @@ import android.net.Uri
 
 data class Folder(
     val folderId: String,
-    val folderName: String,
-    val imageList: MutableList<ImageItem>
+    var folderName: String,
+    var imageList: MutableList<ImageItem>
 )
 
 data class ImageItem(

@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -17,7 +18,7 @@ import com.coldfier.photoplan_test_01.databinding.LocationsFragmentBinding
 import com.coldfier.photoplan_test_01.model.Folder
 import com.coldfier.photoplan_test_01.model.ImageAddContract
 
-class LocationsFragment : Fragment(), FolderClickListener {
+class LocationsFragment : Fragment(), AdapterCallbackInterface {
 
     private lateinit var viewModel: LocationsViewModel
     private lateinit var binding: LocationsFragmentBinding
@@ -57,17 +58,13 @@ class LocationsFragment : Fragment(), FolderClickListener {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         binding = LocationsFragmentBinding.inflate(inflater, container, false)
         val viewModelFactory = LocationsViewModelFactory(requireActivity().application)
         viewModel = ViewModelProvider(this, viewModelFactory).get(LocationsViewModel::class.java)
 
-
-        binding.addNewFolderFAB.setOnClickListener {
-        }
-
-        //viewModel.getFoldersList()
+        viewModel.getFolderList()
 
         foldersRVAdapter = FolderListAdapter(getContent, this)
         binding.foldersRecyclerView.adapter = foldersRVAdapter
@@ -77,7 +74,7 @@ class LocationsFragment : Fragment(), FolderClickListener {
         })
 
         binding.addNewFolderFAB.setOnClickListener {
-            viewModel.addNewFolder(folder = Folder("${Math.random()*253}", "Гора Джомолунгма", mutableListOf()))
+            viewModel.addNewFolder(folder = Folder("abc${(Math.random()*253).toString().replace(".", "")}abc", "Название локации", mutableListOf()))
         }
 
 
@@ -100,6 +97,15 @@ class LocationsFragment : Fragment(), FolderClickListener {
     override fun onClickListener(folderId: String, folderName: String) {
         viewModel.folderId = folderId
         viewModel.folderName = folderName
+    }
+
+    override fun folderNameChanged(folderId: String, folderName: String) {
+        viewModel.updateFolderName(folderId, folderName)
+    }
+
+    override fun hideKeyboard(v: View) {
+        val inputMethodManager = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(v.windowToken, 0)
     }
 
 }
