@@ -7,5 +7,17 @@
     <fragment
         android:id="@+id/locationsFragment"
         android:name="com.coldfier.photoplan_test_01.locationsfragment.LocationsFragment"
-        android:label="LocationsFragment" />
+        android:label="LocationsFragment" >
+        <action
+            android:id="@+id/action_locationsFragment_to_imageToFullScreenFragment"
+            app:destination="@id/imageToFullScreenFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/imageToFullScreenFragment"
+        android:name="com.coldfier.photoplan_test_01.ImageToFullScreenFragment"
+        android:label="ImageToFullScreenFragment" >
+        <argument
+            android:name="imageUri"
+            app:argType="android.net.Uri" />
+    </fragment>
 </navigation>
