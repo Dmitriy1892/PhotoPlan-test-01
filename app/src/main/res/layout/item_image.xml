@@ -12,17 +12,18 @@
     <androidx.cardview.widget.CardView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp"
         app:cardUseCompatPadding="true"
-        app:contentPaddingRight="8dp"
         android:clickable="true"
         android:focusableInTouchMode="true"
         app:cardCornerRadius="15dp">
 
         <ImageView
+            android:contentDescription="@string/image_holder_description"
             android:id="@+id/holderImageView"
             android:layout_width="80dp"
             android:layout_height="100dp"
+            android:scaleType="centerCrop"
             app:setImage="@{uri}"
             />
 
@@ -32,7 +33,7 @@
             android:layout_height="25dp"
             android:visibility="gone"
             android:focusable="true"
-            android:layout_gravity="right|top"
+            android:layout_gravity="end|top"
             android:button="@drawable/checkbox_selector" />
 
 
