@@ -3,4 +3,5 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="fullscreen_image_description">Изображение</string>
     <string name="image_holder_description">Изображение</string>
+    <string name="header_name">ЛОКАЦИИ</string>
 </resources>

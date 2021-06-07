@@ -1,6 +1,5 @@
 package com.coldfier.photoplan_test_01.firebase
 
-import android.annotation.SuppressLint
 import android.util.Log
 import com.coldfier.photoplan_test_01.model.Folder
 import com.coldfier.photoplan_test_01.model.ImageItem
@@ -13,7 +12,7 @@ import com.google.firebase.storage.ktx.storage
 
 class FirebaseApi {
 
-    fun addImageToFirebaseStorage(imageItem: ImageItem, folderId: String) {
+    fun addImageToFirebaseStorage(folderId: String, imageItem: ImageItem) {
         val uploadTask = getFirebaseStorage().reference.child("$folderId/${imageItem.imageId}")
         uploadTask.putFile(imageItem.imageUri)
     }
@@ -66,10 +65,12 @@ class FirebaseApi {
         return listImageItem
     }
 
-    fun deleteImageFromFirebaseStorage(imageItem: ImageItem, folderName: String) {
-        val storageRef = getFirebaseStorage().reference.child("$folderName/${imageItem.imageUri.lastPathSegment}")
+    fun deleteImageFromFirebaseStorage(folderName: String, imageItem: ImageItem) {
+        val storageRef = getFirebaseStorage().reference.child("${imageItem.imageUri.lastPathSegment}")
         storageRef.delete().addOnSuccessListener {
             Log.d("fire", "success with firebase storage deleting")
+        }.addOnFailureListener {
+            Log.d("fire", "fail to deleting")
         }
     }
 

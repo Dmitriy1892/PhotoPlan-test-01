@@ -73,6 +73,10 @@ class LocationsFragment : Fragment(), AdapterCallbackInterface {
             foldersRVAdapter.foldersList = it
         })
 
+        binding.mainClickableLayout.setOnClickListener {
+            foldersRVAdapter.folderListAdapterObserver.value = false
+        }
+
         binding.addNewFolderFAB.setOnClickListener {
             viewModel.addNewFolder(folder = Folder("abc${(Math.random()*253).toString().replace(".", "")}abc", "Название локации", mutableListOf()))
         }
@@ -108,4 +112,7 @@ class LocationsFragment : Fragment(), AdapterCallbackInterface {
         inputMethodManager.hideSoftInputFromWindow(v.windowToken, 0)
     }
 
+    override fun deletePickedImages(folderId: String, deletingImagesList: List<String>) {
+        viewModel.deleteImages(folderId, deletingImagesList)
+    }
 }

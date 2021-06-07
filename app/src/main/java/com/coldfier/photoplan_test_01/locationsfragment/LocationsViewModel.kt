@@ -2,6 +2,7 @@ package com.coldfier.photoplan_test_01.locationsfragment
 
 import android.app.Application
 import android.graphics.*
+import android.net.Uri
 import androidx.core.net.toUri
 import androidx.lifecycle.*
 import com.coldfier.photoplan_test_01.addItem
@@ -14,7 +15,7 @@ import kotlinx.coroutines.launch
 
 class LocationsViewModel(application: Application) : AndroidViewModel(application) {
 
-    val appCtx = application
+    //val appCtx = application
 
     private var _foldersList = MutableLiveData<List<Folder>>()
     val foldersList: LiveData<List<Folder>>
@@ -45,7 +46,7 @@ class LocationsViewModel(application: Application) : AndroidViewModel(applicatio
                     )
                     folder.imageList.add(imageItem)
                     firebaseApi.addFolderToCloudFirestore(folder)
-                    firebaseApi.addImageToFirebaseStorage(imageItem, folder.folderId)
+                    firebaseApi.addImageToFirebaseStorage(folder.folderId, imageItem)
                     _foldersList.updateList()
                     return@launch
                 }
@@ -102,4 +103,27 @@ class LocationsViewModel(application: Application) : AndroidViewModel(applicatio
             firebaseApi.updateFolderCloudFirestoreName(folderId, folderName)
         }
     }
+
+    fun deleteImages(folderId: String, deletingImageIdsList: List<String>) {
+        viewModelScope.launch {
+            var bufferImageItem: ImageItem = ImageItem("", Uri.EMPTY)
+
+            _foldersList.value?.forEach { folder ->
+                if (folder.folderId == folderId) {
+                    folder.imageList.forEach { imageItem ->
+                        deletingImageIdsList.forEach {
+                            if (it == imageItem.imageId) {
+                                firebaseApi.deleteImageFromFirebaseStorage(folderId, imageItem)
+                                bufferImageItem = imageItem
+                            }
+                        }
+                    }
+                }
+                folder.imageList.remove(bufferImageItem)
+            }
+            _foldersList.updateList()
+
+        }
+    }
+
 }
