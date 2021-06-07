@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/mainClickableLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#E5E5E5"
@@ -20,7 +21,7 @@
             android:layout_marginTop="16dp"
             android:background="@drawable/ic_group_303"
             android:fontFamily="@font/oswald_light"
-            android:text="ЛОКАЦИИ"
+            android:text="@string/header_name"
             android:textAlignment="center"
             android:textColor="#212020"
             android:textSize="30sp"

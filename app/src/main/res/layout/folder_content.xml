@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
-
+        android:id="@+id/clickableLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
@@ -70,6 +70,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
+                        android:clickable="true"
+                        android:focusableInTouchMode="true"
                         android:padding="8dp"
                         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -86,6 +88,8 @@
             android:layout_gravity="bottom|center_horizontal"
             android:backgroundTint="#CE6666"
             android:backgroundTintMode="add"
+            android:visibility="gone"
+            android:clickable="false"
             android:fontFamily="@font/ubuntu_medium"
             android:text="Удалить"
             android:textAllCaps="false"

@@ -8,4 +8,6 @@ interface AdapterCallbackInterface {
     fun folderNameChanged(folderId: String, folderName: String)
 
     fun hideKeyboard(v: View)
+
+    fun deletePickedImages(folderId: String, deletingImagesList: List<String>)
 }
