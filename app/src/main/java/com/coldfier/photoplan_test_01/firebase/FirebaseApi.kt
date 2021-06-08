@@ -4,6 +4,7 @@ import android.util.Log
 import com.coldfier.photoplan_test_01.model.Folder
 import com.coldfier.photoplan_test_01.model.ImageItem
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -71,6 +72,12 @@ class FirebaseApi {
             Log.d("fire", "success with firebase storage deleting")
         }.addOnFailureListener {
             Log.d("fire", "fail to deleting")
+        }
+    }
+
+    fun test() {
+        val docRef = getFirestore().collection("locations").get().addOnSuccessListener {
+            val mainFolderName = it.documents[0].id
         }
     }
 

@@ -16,7 +16,7 @@ class FolderListAdapter
         constructor(private val getContent: ActivityResultLauncher<ImageAddContract>,
                     private val adapterCallbackInterface: AdapterCallbackInterface) : RecyclerView.Adapter<FolderListAdapter.FolderListHolder>() {
 
-    var foldersList = listOf<Folder>()
+    var foldersList = mutableListOf<Folder>()
         set(value) {
             field = value
             notifyDataSetChanged()
@@ -68,10 +68,14 @@ class FolderListAdapter
             binding.contentNameEditText.apply {
                 setText(folder.folderName)
                 setOnFocusChangeListener { v, hasFocus ->
-                    if (!hasFocus) adapterCallbackInterface.hideKeyboard(v)
+                    if (!hasFocus) {
+                        adapterCallbackInterface.hideKeyboard(v)
+                        adapterCallbackInterface.folderNameChanged(folder.folderId, binding.contentNameEditText.text.toString())
+                    }
+
                 }
                 doAfterTextChanged {
-                    adapterCallbackInterface.folderNameChanged(folder.folderId, binding.contentNameEditText.text.toString())
+
                 }
             }
 
