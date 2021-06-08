@@ -11,6 +11,7 @@ import com.coldfier.photoplan_test_01.model.Folder
 import com.coldfier.photoplan_test_01.model.ImageAddContract
 import com.coldfier.photoplan_test_01.model.ImageItem
 import com.coldfier.photoplan_test_01.updateList
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class LocationsViewModel(application: Application) : AndroidViewModel(application) {
@@ -26,6 +27,7 @@ class LocationsViewModel(application: Application) : AndroidViewModel(applicatio
 
     init {
         _foldersList.value = listOf()
+        getFolderList()
     }
 
     private val firebaseApi = FirebaseApi()
@@ -66,29 +68,31 @@ class LocationsViewModel(application: Application) : AndroidViewModel(applicatio
 
     //not the best case, need to review
     fun getFolderList() {
-        val folderList = mutableListOf<Folder>()
-        FirebaseApi.getFirestore().collection("locations").document("streets").get().addOnSuccessListener {
-            it.data?.forEach { (key, value) ->
-                apply {
+        viewModelScope.launch {
+            val folderList = mutableListOf<Folder>()
+            FirebaseApi.getFirestore().collection("locations").document("streets").get().addOnSuccessListener {
+                it.data?.forEach { (key, value) ->
+                    apply {
 
-                    //start
-                    val listImageItem = mutableListOf<ImageItem>()
-                    val storageRef = FirebaseApi.getFirebaseStorage().reference.child(key)
-                    storageRef.listAll().addOnSuccessListener { listResult ->
-                        //сюда летят ссылки на фото и формируется список со ссылками
-                        listResult.items.forEach { storageReference ->
-                            storageReference.downloadUrl.addOnSuccessListener { uri ->
-                                val imageItem = ImageItem(uri.lastPathSegment.toString(), uri)
-                                listImageItem.add(imageItem)
-                                _foldersList.updateList()
+                        //start
+                        val listImageItem = mutableListOf<ImageItem>()
+                        val storageRef = FirebaseApi.getFirebaseStorage().reference.child(key)
+                        storageRef.listAll().addOnSuccessListener { listResult ->
+                            //сюда летят ссылки на фото и формируется список со ссылками
+                            listResult.items.forEach { storageReference ->
+                                storageReference.downloadUrl.addOnSuccessListener { uri ->
+                                    val imageItem = ImageItem(uri.lastPathSegment.toString(), uri)
+                                    listImageItem.add(imageItem)
+                                    _foldersList.updateList()
+                                }
                             }
                         }
-                    }
-                    //end
-                    folderList.add(Folder(key, value.toString(), listImageItem))
+                        //end
+                        folderList.add(Folder(key, value.toString(), listImageItem))
 
-                } }
-            _foldersList.value = folderList
+                    } }
+                _foldersList.value = folderList
+            }
         }
     }
 
@@ -125,5 +129,4 @@ class LocationsViewModel(application: Application) : AndroidViewModel(applicatio
 
         }
     }
-
 }
