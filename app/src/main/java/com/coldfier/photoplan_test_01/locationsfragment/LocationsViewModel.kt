@@ -105,6 +105,7 @@ class LocationsViewModel(application: Application) : AndroidViewModel(applicatio
                 }
             }
             firebaseApi.updateFolderCloudFirestoreName(folderId, folderName)
+            _foldersList.updateList()
         }
     }
 
@@ -126,6 +127,12 @@ class LocationsViewModel(application: Application) : AndroidViewModel(applicatio
                 folder.imageList.remove(bufferImageItem)
             }
             _foldersList.updateList()
+
+        }
+    }
+
+    fun updateLocationName() {
+        viewModelScope.launch {
 
         }
     }

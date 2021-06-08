@@ -28,12 +28,12 @@
 
         <CheckBox
             android:id="@+id/deleteCheckBox"
-            android:layout_width="22dp"
-            android:layout_height="25dp"
-            android:visibility="gone"
-            android:focusable="true"
+            android:layout_width="26dp"
+            android:layout_height="27dp"
             android:layout_gravity="end|top"
-            android:button="@drawable/checkbox_selector" />
+            android:button="@drawable/checkbox_selector"
+            android:focusable="true"
+            android:visibility="visible" />
 
 
     </androidx.cardview.widget.CardView>

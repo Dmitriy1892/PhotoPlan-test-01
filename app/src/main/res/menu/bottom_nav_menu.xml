@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/setting"
+        android:icon="@drawable/setting_nav"
+        android:title="setting"
+        android:contentDescription="Setting"
+        app:showAsAction="always"/>
+
+    <item android:id="@+id/money"
+        android:icon="@drawable/money_nav"
+        android:title="Money"
+        android:contentDescription="Money"
+        app:showAsAction="always"/>
+
+    <item android:id="@+id/blank"
+        android:title="blank"
+        app:showAsAction="always"
+        android:icon="@drawable/blank_nav"/>
+
+    <item android:id="@+id/moodboard"
+        android:icon="@drawable/moodboard_nav"
+        android:title="Moodboard"
+        android:contentDescription="Moodboard"
+        app:showAsAction="always" />
+
+    <item android:id="@+id/locations"
+        android:icon="@drawable/location_nav"
+        android:title="Locations"
+        android:contentDescription="Locations"
+        app:showAsAction="always" />
+
+</menu>

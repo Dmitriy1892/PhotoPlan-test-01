@@ -68,7 +68,7 @@ class LocationsFragment : Fragment(), AdapterCallbackInterface {
         binding.foldersRecyclerView.adapter = foldersRVAdapter
         binding.foldersRecyclerView.layoutManager = LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
         viewModel.foldersList.observe(viewLifecycleOwner, {
-            foldersRVAdapter.foldersList = it
+            foldersRVAdapter.foldersList = it.toMutableList()
         })
 
         binding.mainClickableLayout.setOnClickListener {
