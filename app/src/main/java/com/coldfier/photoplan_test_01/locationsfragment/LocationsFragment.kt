@@ -64,8 +64,6 @@ class LocationsFragment : Fragment(), AdapterCallbackInterface {
         val viewModelFactory = LocationsViewModelFactory(requireActivity().application)
         viewModel = ViewModelProvider(this, viewModelFactory).get(LocationsViewModel::class.java)
 
-        viewModel.getFolderList()
-
         foldersRVAdapter = FolderListAdapter(getContent, this)
         binding.foldersRecyclerView.adapter = foldersRVAdapter
         binding.foldersRecyclerView.layoutManager = LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
